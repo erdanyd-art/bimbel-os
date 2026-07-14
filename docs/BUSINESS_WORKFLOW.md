@@ -4,12 +4,12 @@ This document describes how a small, independent tutoring center ("bimbel") oper
 
 ## Actors
 
-| Actor | Typical Profile |
-|---|---|
-| **Owner** | Founder/operator. Handles strategy, finance oversight, hiring, and often sales. May also teach. |
-| **Admin** | Single point of coordination. Manages registration, scheduling, attendance follow-up, payment tracking, and parent communication. |
-| **Teacher** | Delivers classes. May be full-time, part-time, or paid per session. |
-| **Parent / Student** | Customer. Parent typically handles enrollment and payment decisions; student attends class. |
+| Actor                | Typical Profile                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Owner**            | Founder/operator. Handles strategy, finance oversight, hiring, and often sales. May also teach.                                   |
+| **Admin**            | Single point of coordination. Manages registration, scheduling, attendance follow-up, payment tracking, and parent communication. |
+| **Teacher**          | Delivers classes. May be full-time, part-time, or paid per session.                                                               |
+| **Parent / Student** | Customer. Parent typically handles enrollment and payment decisions; student attends class.                                       |
 
 In a center of 1–200 students, these roles are rarely more than 3–5 people total, and the Owner and Admin roles are sometimes the same person.
 
@@ -65,7 +65,7 @@ The Owner's involvement is typically not continuous through the day; it is conce
 - **Output:** Either a confirmed new class assignment, a confirmed decision to keep the student in the original class, or — if no agreement is reached — the family disengaging (pausing or leaving).
 - **Pain points:**
   - This is not a one-shot decision — it commonly loops: a proposed change is rejected, a meeting is held, a revised proposal is made, which may itself be rejected again.
-  - There is no record of *why* a past reassignment happened, so if the same student's placement is questioned again later, the reasoning has to be reconstructed from memory.
+  - There is no record of _why_ a past reassignment happened, so if the same student's placement is questioned again later, the reasoning has to be reconstructed from memory.
   - Resolving a disputed reassignment consumes disproportionate Owner and Admin time relative to how often it happens, because each case is handled from scratch rather than following a known playbook.
   - A drawn-out disagreement risks the family's trust and retention regardless of which class the student ends up in, and there's no way to track how often this pattern leads to a student leaving.
 

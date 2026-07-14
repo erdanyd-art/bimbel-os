@@ -109,7 +109,7 @@ Entities are classified using standard Domain-Driven Design strategic patterns:
 ### Role
 
 - **Purpose:** Represents the capacity in which a Person is acting — Owner, Admin, Teacher, or Parent — and the responsibilities and authority that come with it, as distinct from the person's identity.
-- **Responsibilities:** *Owner* sets strategy, approves exceptions, and consumes Business Snapshots. *Admin* is the coordination hub — performs or facilitates nearly every Core Domain workflow (Enrollment, Class Assignment, Attendance consolidation, Invoice tracking, Escalation Case handling).
+- **Responsibilities:** _Owner_ sets strategy, approves exceptions, and consumes Business Snapshots. _Admin_ is the coordination hub — performs or facilitates nearly every Core Domain workflow (Enrollment, Class Assignment, Attendance consolidation, Invoice tracking, Escalation Case handling).
 - **Relationships:** Applied to a Person; referenced throughout the Core and Supporting Domain as "who performs" or "who decides" for a given entity.
 
 ### Center
@@ -134,23 +134,23 @@ Entities are classified using standard Domain-Driven Design strategic patterns:
 
 ## Summary Table
 
-| Entity | Category |
-|---|---|
-| Student | Core Domain |
-| Parent / Guardian | Core Domain |
-| Enrollment | Core Domain |
-| Placement Assessment | Core Domain |
-| Class Assignment | Core Domain |
-| Escalation Case | Core Domain |
-| Attendance Record | Core Domain |
-| Invoice | Core Domain |
-| Class | Supporting Domain |
-| Class Session | Supporting Domain |
-| Teacher | Supporting Domain |
-| Teaching Assignment | Supporting Domain |
-| Business Snapshot | Supporting Domain |
-| Person | Shared Concept |
-| Role | Shared Concept |
-| Center | Shared Concept |
-| Money (Fee) | Shared Concept |
-| Term / Billing Cycle | Shared Concept |
+| Entity               | Category          |
+| -------------------- | ----------------- |
+| Student              | Core Domain       |
+| Parent / Guardian    | Core Domain       |
+| Enrollment           | Core Domain       |
+| Placement Assessment | Core Domain       |
+| Class Assignment     | Core Domain       |
+| Escalation Case      | Core Domain       |
+| Attendance Record    | Core Domain       |
+| Invoice              | Core Domain       |
+| Class                | Supporting Domain |
+| Class Session        | Supporting Domain |
+| Teacher              | Supporting Domain |
+| Teaching Assignment  | Supporting Domain |
+| Business Snapshot    | Supporting Domain |
+| Person               | Shared Concept    |
+| Role                 | Shared Concept    |
+| Center               | Shared Concept    |
+| Money (Fee)          | Shared Concept    |
+| Term / Billing Cycle | Shared Concept    |
