@@ -20,7 +20,8 @@ export default async function DashboardPage() {
           Signed in as <span className="font-medium">{user.email}</span>
         </p>
         <p className="text-muted-foreground text-sm">
-          Role: <span className="text-foreground font-medium capitalize">{user.role}</span>
+          {user.roles.length > 1 ? "Roles" : "Role"}:{" "}
+          <span className="text-foreground font-medium capitalize">{user.roles.join(", ")}</span>
         </p>
       </div>
 
