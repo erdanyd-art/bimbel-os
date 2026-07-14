@@ -14,8 +14,42 @@ As a center grows past a few dozen students, this manual coordination becomes th
 
 ## Target User
 
+Per [PROJECT_VISION.md](./PROJECT_VISION.md), Bimbel OS is built for the owner-operator of a single, independent tutoring center with a few dozen to a couple hundred students and a 3–5 person staff. Two roles will actually use the product day to day:
+
+- **Admin (primary user).** The coordination hub who touches nearly every workflow — registration, scheduling, attendance consolidation, payment tracking, escalation handling (see [BUSINESS_WORKFLOW.md](./BUSINESS_WORKFLOW.md)). The product's day-to-day usability is judged against this person's workload, since their time is the bottleneck the business is capped by.
+- **Owner (secondary user).** Consumes summarized business health (enrollment, revenue, class utilization) rather than performing data entry; needs answers in under a minute without interrupting the Admin.
+
+Teachers and Parents are participants in the workflows the product supports (attendance-taking, payment) but are not the primary designed-for user in the MVP — their touchpoints should be as low-friction as possible without requiring them to adopt a full account/login experience if it can be avoided.
+
 ## Goals
+
+Restated from the Domain Model's framing of what the Core Domain exists to protect — the product succeeds if it moves these three needles:
+
+1. **Revenue integrity** — every Student's billing obligation is traceable to an Enrollment agreement and verifiable against Attendance, so "who owes what" has one current, trustworthy answer instead of requiring cross-referencing multiple lists.
+2. **Student retention** — patterns that put a Student at risk (attendance drop-off, an unresolved Escalation Case) are visible to the Admin/Owner before a parent complaint or refund request, not after.
+3. **Owner visibility without manual compilation** — the Owner can answer "how many active students, how much revenue confirmed vs. outstanding, which classes need attention" in under a minute, without asking the Admin to assemble it.
+
+A secondary, cross-cutting goal: reduce the Admin's manual hand-off work (re-typing the same student/payment information across spreadsheets and chat) identified as the cross-cutting bottleneck in [BUSINESS_WORKFLOW.md](./BUSINESS_WORKFLOW.md#cross-cutting-observation).
 
 ## MVP Features
 
+Scoped to the Core Domain entities and the workflows that most directly serve the three goals above. Each item maps to an entity in [DOMAIN_MODEL.md](./DOMAIN_MODEL.md):
+
+1. **Student & Parent records** — single record per Student and Parent/Guardian, replacing scattered spreadsheet entries; carries enrollment history so re-enrollment after a gap doesn't mean re-entering data from scratch.
+2. **Enrollment** — turn a registration into a Student record with an agreed fee, start date, and tentative Class expectation.
+3. **Class & Class Assignment** — a catalog of Classes (subject, level, capacity) and the current, authoritative record of which Class each Student is in.
+4. **Attendance recording** — per-Class-Session attendance capture by the Teacher, replacing paper transcription, immediately visible to Admin/Owner.
+5. **Invoice & Payment tracking** — record what's owed per Student per billing period, record confirmed payments, and surface a single current view of who has paid, who is late, and who is due for renewal.
+6. **Owner dashboard (Business Snapshot)** — a point-in-time summary view: active student count, revenue confirmed vs. outstanding, class utilization/under-enrollment flags.
+
+Deferred past MVP (real Core Domain concepts, but not required to prove the three goals first): **Placement Assessment** as a distinct formal workflow, **Escalation Case** tracking (disputes are handled outside the system for now), **Teaching Assignment** / substitute management and teacher pay calculation, and scheduling conflict detection.
+
 ## Out of Scope
+
+Restated from [PROJECT_VISION.md](./PROJECT_VISION.md#what-we-will-deliberately-not-become) as product exclusions, not just aspirational framing:
+
+- No curriculum, content delivery, video lessons, or other student-facing learning tools.
+- No marketplace or discovery features connecting parents to tutors/centers.
+- No multi-branch/franchise support — single Center scope only, per the [Center](./DOMAIN_MODEL.md#center) entity definition.
+- No in-app chat or attempt to replace WhatsApp-style parent communication — the product records outcomes (an Enrollment, an Invoice), not the conversations that produced them.
+- No general-purpose accounting, generic CRM, or generic scheduling functionality beyond what the Core Domain workflows require.
