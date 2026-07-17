@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/features/auth/queries/get-current-user";
 import { getStudents } from "@/features/students/queries/get-students";
 import { StudentsSearch } from "@/features/students/components/students-search";
 import { StudentsEmptyState } from "@/features/students/components/students-empty-state";
+import { StudentsList } from "@/features/students/components/students-list";
 import { AddStudentDrawer } from "@/features/students/components/add-student-drawer";
 
 export default async function StudentsPage() {
@@ -25,10 +26,7 @@ export default async function StudentsPage() {
       {students.length === 0 ? (
         <StudentsEmptyState canCreate={canCreate} />
       ) : (
-        <p className="text-muted-foreground text-sm">
-          {students.length} student{students.length === 1 ? "" : "s"} found — list view arrives in
-          Sprint 9.
-        </p>
+        <StudentsList students={students} />
       )}
     </div>
   );

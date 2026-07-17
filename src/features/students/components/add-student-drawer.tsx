@@ -42,14 +42,34 @@ export function AddStudentDrawer() {
     setValues((prev) => ({ ...prev, [field]: value }));
   }
 
+  function isDirty() {
+    return (Object.keys(EMPTY_VALUES) as (keyof CreateStudentFormValues)[]).some(
+      (key) => values[key] !== EMPTY_VALUES[key],
+    );
+  }
+
+  // Bypasses the unsaved-changes confirmation — used after a successful
+  // save, where there's nothing left to "discard."
+  function resetAndClose() {
+    setOpen(false);
+    setValues(EMPTY_VALUES);
+    setFieldErrors({});
+    setFormError(null);
+  }
+
+  // Wired to the drawer's own onOpenChange (fires on Escape, outside click,
+  // and the backdrop) as well as the Cancel button, so every dismissal path
+  // gets the same unsaved-changes check.
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
-    setOpen(nextOpen);
-    if (!nextOpen) {
-      setValues(EMPTY_VALUES);
-      setFieldErrors({});
-      setFormError(null);
+    if (nextOpen) {
+      setOpen(true);
+      return;
     }
+    if (isDirty() && !window.confirm("Discard unsaved changes?")) {
+      return;
+    }
+    resetAndClose();
   }
 
   function handleSubmit(event: FormEvent) {
@@ -73,21 +93,28 @@ export function AddStudentDrawer() {
     setFieldErrors({});
 
     startTransition(async () => {
-      const result = await createStudent(values);
+      try {
+        const result = await createStudent(values);
 
-      if (!result.success) {
-        setFormError(result.error);
-        if (result.fieldErrors) setFieldErrors(result.fieldErrors);
-        return;
+        if (!result.success) {
+          setFormError(result.error);
+          if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+          return;
+        }
+
+        resetAndClose();
+        router.refresh();
+        toastManager.add({
+          title: "Student created successfully.",
+          type: "success",
+          timeout: 4000,
+        });
+      } catch {
+        // Server Action call itself failed to complete (offline, timeout,
+        // an exception that never made it to a structured result) — the
+        // form's data is preserved so the user doesn't lose their input.
+        setFormError("Network error. Please check your connection and try again.");
       }
-
-      handleOpenChange(false);
-      router.refresh();
-      toastManager.add({
-        title: "Student created successfully.",
-        type: "success",
-        timeout: 4000,
-      });
     });
   }
 
@@ -116,7 +143,7 @@ export function AddStudentDrawer() {
 
             <fieldset className="mt-6 flex flex-col gap-4" disabled={isPending}>
               <legend className="text-tertiary text-xs font-semibold tracking-wide uppercase">
-                Student Information
+                Student
               </legend>
 
               <div className="flex flex-col gap-1.5">
@@ -125,17 +152,22 @@ export function AddStudentDrawer() {
                 </Label>
                 <Input
                   id="fullName"
+                  autoFocus
                   value={values.fullName}
                   onChange={(event) => updateField("fullName", event.target.value)}
                   aria-invalid={!!fieldErrors.fullName}
+                  aria-required="true"
+                  aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
                 />
                 {fieldErrors.fullName ? (
-                  <p className="text-destructive text-xs">{fieldErrors.fullName}</p>
+                  <p id="fullName-error" className="text-destructive text-xs">
+                    {fieldErrors.fullName}
+                  </p>
                 ) : null}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="gradeLevel">Grade / level</Label>
+                <Label htmlFor="gradeLevel">Grade level</Label>
                 <Input
                   id="gradeLevel"
                   value={values.gradeLevel}
@@ -152,36 +184,43 @@ export function AddStudentDrawer() {
                   value={values.dateOfBirth}
                   onChange={(event) => updateField("dateOfBirth", event.target.value)}
                   aria-invalid={!!fieldErrors.dateOfBirth}
+                  aria-describedby={fieldErrors.dateOfBirth ? "dateOfBirth-error" : undefined}
                 />
                 {fieldErrors.dateOfBirth ? (
-                  <p className="text-destructive text-xs">{fieldErrors.dateOfBirth}</p>
+                  <p id="dateOfBirth-error" className="text-destructive text-xs">
+                    {fieldErrors.dateOfBirth}
+                  </p>
                 ) : null}
               </div>
             </fieldset>
 
             <fieldset className="mt-6 flex flex-col gap-4" disabled={isPending}>
               <legend className="text-tertiary text-xs font-semibold tracking-wide uppercase">
-                Parent / Guardian
+                Parent
               </legend>
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="parentName">
-                  Name <span className="text-destructive">*</span>
+                  Parent name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="parentName"
                   value={values.parentName}
                   onChange={(event) => updateField("parentName", event.target.value)}
                   aria-invalid={!!fieldErrors.parentName}
+                  aria-required="true"
+                  aria-describedby={fieldErrors.parentName ? "parentName-error" : undefined}
                 />
                 {fieldErrors.parentName ? (
-                  <p className="text-destructive text-xs">{fieldErrors.parentName}</p>
+                  <p id="parentName-error" className="text-destructive text-xs">
+                    {fieldErrors.parentName}
+                  </p>
                 ) : null}
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="parentPhone">
-                  Phone <span className="text-destructive">*</span>
+                  Parent phone <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="parentPhone"
@@ -189,23 +228,30 @@ export function AddStudentDrawer() {
                   value={values.parentPhone}
                   onChange={(event) => updateField("parentPhone", event.target.value)}
                   aria-invalid={!!fieldErrors.parentPhone}
+                  aria-required="true"
+                  aria-describedby={fieldErrors.parentPhone ? "parentPhone-error" : undefined}
                 />
                 {fieldErrors.parentPhone ? (
-                  <p className="text-destructive text-xs">{fieldErrors.parentPhone}</p>
+                  <p id="parentPhone-error" className="text-destructive text-xs">
+                    {fieldErrors.parentPhone}
+                  </p>
                 ) : null}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="parentEmail">Email</Label>
+                <Label htmlFor="parentEmail">Parent email</Label>
                 <Input
                   id="parentEmail"
                   type="email"
                   value={values.parentEmail}
                   onChange={(event) => updateField("parentEmail", event.target.value)}
                   aria-invalid={!!fieldErrors.parentEmail}
+                  aria-describedby={fieldErrors.parentEmail ? "parentEmail-error" : undefined}
                 />
                 {fieldErrors.parentEmail ? (
-                  <p className="text-destructive text-xs">{fieldErrors.parentEmail}</p>
+                  <p id="parentEmail-error" className="text-destructive text-xs">
+                    {fieldErrors.parentEmail}
+                  </p>
                 ) : null}
               </div>
             </fieldset>
