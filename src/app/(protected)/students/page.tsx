@@ -2,11 +2,16 @@ import { getCurrentUser } from "@/features/auth/queries/get-current-user";
 import { getStudents } from "@/features/students/queries/get-students";
 import { StudentsSearch } from "@/features/students/components/students-search";
 import { StudentsEmptyState } from "@/features/students/components/students-empty-state";
-import { StudentsList } from "@/features/students/components/students-list";
+import { StudentsTable } from "@/features/students/components/students-table";
 import { AddStudentDrawer } from "@/features/students/components/add-student-drawer";
 
-export default async function StudentsPage() {
-  const [user, students] = await Promise.all([getCurrentUser(), getStudents()]);
+export default async function StudentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const [user, students] = await Promise.all([getCurrentUser(), getStudents(q)]);
   const canCreate = user ? user.roles.includes("owner") || user.roles.includes("admin") : false;
 
   return (
@@ -18,15 +23,15 @@ export default async function StudentsPage() {
             Manage student records, parent contact, and enrollment status.
           </p>
         </div>
-        {students.length > 0 && canCreate ? <AddStudentDrawer /> : null}
+        {canCreate ? <AddStudentDrawer /> : null}
       </div>
 
       <StudentsSearch />
 
       {students.length === 0 ? (
-        <StudentsEmptyState canCreate={canCreate} />
+        <StudentsEmptyState canCreate={canCreate} searchQuery={q} />
       ) : (
-        <StudentsList students={students} />
+        <StudentsTable students={students} />
       )}
     </div>
   );

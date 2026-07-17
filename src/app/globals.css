@@ -42,6 +42,7 @@
   --color-tertiary: var(--text-tertiary);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-border-strong: var(--border-strong);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -93,6 +94,7 @@
   --text-tertiary: #a1a1aa;
   --success: #16a34a;
   --warning: #d97706;
+  --border-strong: #d4d4d8;
 }
 
 .dark {

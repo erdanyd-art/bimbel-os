@@ -1,8 +1,28 @@
-import { Users } from "lucide-react";
+import { SearchX, Users } from "lucide-react";
 
 import { AddStudentDrawer } from "@/features/students/components/add-student-drawer";
 
-export function StudentsEmptyState({ canCreate }: { canCreate: boolean }) {
+export function StudentsEmptyState({
+  canCreate,
+  searchQuery,
+}: {
+  canCreate: boolean;
+  searchQuery?: string;
+}) {
+  if (searchQuery) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-16 text-center">
+        <SearchX className="text-tertiary size-8" />
+        <div className="flex max-w-xs flex-col gap-1">
+          <p className="text-foreground text-sm font-medium">
+            No matches for &quot;{searchQuery}&quot;
+          </p>
+          <p className="text-muted-foreground text-sm">Try a different name.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-16 text-center">
       <Users className="text-tertiary size-8" />

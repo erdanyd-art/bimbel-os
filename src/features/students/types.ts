@@ -10,4 +10,6 @@ export type Student = {
   parent_email: string | null;
   status: StudentStatus;
   active_class_names: string | null;
+  created_at: string;
+  updated_at: string;
 };
