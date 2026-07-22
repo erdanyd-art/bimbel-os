@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { getCurrentUser } from "@/features/auth/queries/get-current-user";
 import { getStudentById } from "@/features/students/queries/get-student";
-import { StatusDot } from "@/features/students/components/status-dot";
-import { formatDate, formatDateTime } from "@/features/students/format";
+import { StatusDot } from "@/components/ui/status-dot";
+import { formatDate, formatDateTime } from "@/lib/format";
+import { EditStudentDrawer } from "@/features/students/components/edit-student-drawer";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,6 +15,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   if (!student) {
     notFound();
   }
+
+  const user = await getCurrentUser();
+  const canEdit = user ? user.roles.includes("owner") || user.roles.includes("admin") : false;
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-6">
@@ -24,9 +29,12 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         Back to Students
       </Link>
 
-      <div className="flex items-center gap-3">
-        <h1 className="text-foreground text-xl font-semibold">{student.full_name}</h1>
-        <StatusDot status={student.status} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-foreground text-xl font-semibold">{student.full_name}</h1>
+          <StatusDot active={student.status === "active"} label={student.status} />
+        </div>
+        {canEdit ? <EditStudentDrawer student={student} /> : null}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

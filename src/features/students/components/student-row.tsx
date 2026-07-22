@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { StatusDot } from "@/features/students/components/status-dot";
-import { formatDate } from "@/features/students/format";
+import { StatusDot } from "@/components/ui/status-dot";
+import { formatDate } from "@/lib/format";
 import type { Student } from "@/features/students/types";
 
 // The whole row is clickable (mouse convenience via onClick on <tr>), but
@@ -31,7 +31,7 @@ export function StudentRow({ student }: { student: Student }) {
       <td className="text-muted-foreground px-4 py-3 text-sm">{student.parent_name}</td>
       <td className="text-muted-foreground px-4 py-3 font-mono text-sm">{student.parent_phone}</td>
       <td className="px-4 py-3">
-        <StatusDot status={student.status} />
+        <StatusDot active={student.status === "active"} label={student.status} />
       </td>
       <td className="text-muted-foreground px-4 py-3 font-mono text-sm">
         {formatDate(student.created_at)}

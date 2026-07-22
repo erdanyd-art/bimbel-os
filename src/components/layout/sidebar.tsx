@@ -27,7 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, enabled: true },
   { label: "Students", href: "/students", icon: Users, enabled: true },
   { label: "Teachers", href: "/teachers", icon: GraduationCap, enabled: false },
-  { label: "Classes", href: "/classes", icon: BookOpen, enabled: false },
+  { label: "Classes", href: "/classes", icon: BookOpen, enabled: true },
   { label: "Attendance", href: "/attendance", icon: CalendarCheck, enabled: false },
   { label: "Payments", href: "/payments", icon: CreditCard, enabled: false },
   { label: "Reports", href: "/reports", icon: BarChart3, enabled: false },

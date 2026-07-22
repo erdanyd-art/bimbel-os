@@ -13,50 +13,58 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { useToastManager } from "@/components/ui/toast";
-import { StudentForm } from "@/features/students/components/student-form";
-import { createStudentSchema, type CreateStudentFormValues } from "@/features/students/schema";
-import { createStudent } from "@/features/students/actions/create-student";
+import { ClassForm } from "@/features/classes/components/class-form";
+import {
+  classFormSchema,
+  flattenClassFormErrors,
+  type ClassFormValues,
+} from "@/features/classes/schema";
+import { createClass } from "@/features/classes/actions/create-class";
+import type { SubjectOption, TeacherOption } from "@/features/classes/types";
 
-const EMPTY_VALUES: CreateStudentFormValues = {
-  fullName: "",
-  gradeLevel: "",
-  dateOfBirth: "",
-  parentName: "",
-  parentPhone: "",
-  parentEmail: "",
+const EMPTY_VALUES: ClassFormValues = {
+  name: "",
+  subjectId: "",
+  newSubjectName: "",
+  level: "",
+  teacherId: "",
+  capacity: "",
+  status: "active",
+  schedule: [],
 };
 
-export function AddStudentDrawer() {
+export function AddClassDrawer({
+  subjects,
+  teachers,
+}: {
+  subjects: SubjectOption[];
+  teachers: TeacherOption[];
+}) {
   const [open, setOpen] = useState(false);
-  const [values, setValues] = useState<CreateStudentFormValues>(EMPTY_VALUES);
+  const [values, setValues] = useState<ClassFormValues>(EMPTY_VALUES);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [scheduleErrors, setScheduleErrors] = useState<Record<number, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const toastManager = useToastManager();
 
-  function updateField(field: keyof CreateStudentFormValues, value: string) {
+  function updateField<K extends keyof ClassFormValues>(field: K, value: ClassFormValues[K]) {
     setValues((prev) => ({ ...prev, [field]: value }));
   }
 
   function isDirty() {
-    return (Object.keys(EMPTY_VALUES) as (keyof CreateStudentFormValues)[]).some(
-      (key) => values[key] !== EMPTY_VALUES[key],
-    );
+    return JSON.stringify(values) !== JSON.stringify(EMPTY_VALUES);
   }
 
-  // Bypasses the unsaved-changes confirmation — used after a successful
-  // save, where there's nothing left to "discard."
   function resetAndClose() {
     setOpen(false);
     setValues(EMPTY_VALUES);
     setFieldErrors({});
+    setScheduleErrors({});
     setFormError(null);
   }
 
-  // Wired to the drawer's own onOpenChange (fires on Escape, outside click,
-  // and the backdrop) as well as the Cancel button, so every dismissal path
-  // gets the same unsaved-changes check.
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
     if (nextOpen) {
@@ -75,23 +83,21 @@ export function AddStudentDrawer() {
 
     setFormError(null);
 
-    const parsed = createStudentSchema.safeParse(values);
+    const parsed = classFormSchema.safeParse(values);
     if (!parsed.success) {
-      const errors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0];
-        if (typeof key === "string" && !errors[key]) {
-          errors[key] = issue.message;
-        }
-      }
+      const { fieldErrors: errors, scheduleErrors: slotErrors } = flattenClassFormErrors(
+        parsed.error,
+      );
       setFieldErrors(errors);
+      setScheduleErrors(slotErrors);
       return;
     }
     setFieldErrors({});
+    setScheduleErrors({});
 
     startTransition(async () => {
       try {
-        const result = await createStudent(values);
+        const result = await createClass(values);
 
         if (!result.success) {
           setFormError(result.error);
@@ -102,14 +108,11 @@ export function AddStudentDrawer() {
         resetAndClose();
         router.refresh();
         toastManager.add({
-          title: "Student created successfully.",
+          title: "Class created successfully.",
           type: "success",
           timeout: 4000,
         });
       } catch {
-        // Server Action call itself failed to complete (offline, timeout,
-        // an exception that never made it to a structured result) — the
-        // form's data is preserved so the user doesn't lose their input.
         setFormError("Network error. Please check your connection and try again.");
       }
     });
@@ -119,15 +122,13 @@ export function AddStudentDrawer() {
     <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection="right">
       <Button onClick={() => setOpen(true)}>
         <Plus className="size-4" />
-        Add Student
+        Add Class
       </Button>
       <DrawerContent>
         <form onSubmit={handleSubmit} className="flex h-full flex-col">
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <DrawerTitle>Add Student</DrawerTitle>
-            <DrawerDescription>
-              Enter the student and parent details to create a new record.
-            </DrawerDescription>
+            <DrawerTitle>Add Class</DrawerTitle>
+            <DrawerDescription>Set up a new recurring tutoring group.</DrawerDescription>
 
             {formError ? (
               <p
@@ -138,12 +139,17 @@ export function AddStudentDrawer() {
               </p>
             ) : null}
 
-            <StudentForm
-              values={values}
-              onFieldChange={updateField}
-              fieldErrors={fieldErrors}
-              disabled={isPending}
-            />
+            <div className="mt-6">
+              <ClassForm
+                values={values}
+                onFieldChange={updateField}
+                fieldErrors={fieldErrors}
+                scheduleErrors={scheduleErrors}
+                subjects={subjects}
+                teachers={teachers}
+                disabled={isPending}
+              />
+            </div>
           </div>
 
           <DrawerFooter>
@@ -157,7 +163,7 @@ export function AddStudentDrawer() {
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-              Save Student
+              Save Class
             </Button>
           </DrawerFooter>
         </form>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2 } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,20 +15,30 @@ import {
 import { useToastManager } from "@/components/ui/toast";
 import { StudentForm } from "@/features/students/components/student-form";
 import { createStudentSchema, type CreateStudentFormValues } from "@/features/students/schema";
-import { createStudent } from "@/features/students/actions/create-student";
+import { updateStudent } from "@/features/students/actions/update-student";
+import type { Student } from "@/features/students/types";
 
-const EMPTY_VALUES: CreateStudentFormValues = {
-  fullName: "",
-  gradeLevel: "",
-  dateOfBirth: "",
-  parentName: "",
-  parentPhone: "",
-  parentEmail: "",
-};
+function toFormValues(student: Student): CreateStudentFormValues {
+  return {
+    fullName: student.full_name,
+    gradeLevel: student.grade_level ?? "",
+    dateOfBirth: student.date_of_birth ?? "",
+    parentName: student.parent_name,
+    parentPhone: student.parent_phone,
+    parentEmail: student.parent_email ?? "",
+  };
+}
 
-export function AddStudentDrawer() {
+// initialValues is re-derived from the `student` prop on every render —
+// after a successful save, router.refresh() causes the parent page to
+// re-fetch and pass updated data, so the next time this drawer opens it's
+// already showing the just-saved values, not stale closure state (same
+// pattern as EditClassDrawer).
+export function EditStudentDrawer({ student }: { student: Student }) {
+  const initialValues = toFormValues(student);
+
   const [open, setOpen] = useState(false);
-  const [values, setValues] = useState<CreateStudentFormValues>(EMPTY_VALUES);
+  const [values, setValues] = useState<CreateStudentFormValues>(initialValues);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -40,33 +50,24 @@ export function AddStudentDrawer() {
   }
 
   function isDirty() {
-    return (Object.keys(EMPTY_VALUES) as (keyof CreateStudentFormValues)[]).some(
-      (key) => values[key] !== EMPTY_VALUES[key],
+    return (Object.keys(initialValues) as (keyof CreateStudentFormValues)[]).some(
+      (key) => values[key] !== initialValues[key],
     );
   }
 
-  // Bypasses the unsaved-changes confirmation — used after a successful
-  // save, where there's nothing left to "discard."
-  function resetAndClose() {
-    setOpen(false);
-    setValues(EMPTY_VALUES);
-    setFieldErrors({});
-    setFormError(null);
-  }
-
-  // Wired to the drawer's own onOpenChange (fires on Escape, outside click,
-  // and the backdrop) as well as the Cancel button, so every dismissal path
-  // gets the same unsaved-changes check.
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
     if (nextOpen) {
+      setValues(initialValues);
+      setFieldErrors({});
+      setFormError(null);
       setOpen(true);
       return;
     }
     if (isDirty() && !window.confirm("Discard unsaved changes?")) {
       return;
     }
-    resetAndClose();
+    setOpen(false);
   }
 
   function handleSubmit(event: FormEvent) {
@@ -91,7 +92,7 @@ export function AddStudentDrawer() {
 
     startTransition(async () => {
       try {
-        const result = await createStudent(values);
+        const result = await updateStudent(student.id, values);
 
         if (!result.success) {
           setFormError(result.error);
@@ -99,17 +100,14 @@ export function AddStudentDrawer() {
           return;
         }
 
-        resetAndClose();
+        setOpen(false);
         router.refresh();
         toastManager.add({
-          title: "Student created successfully.",
+          title: "Student updated successfully.",
           type: "success",
           timeout: 4000,
         });
       } catch {
-        // Server Action call itself failed to complete (offline, timeout,
-        // an exception that never made it to a structured result) — the
-        // form's data is preserved so the user doesn't lose their input.
         setFormError("Network error. Please check your connection and try again.");
       }
     });
@@ -117,17 +115,15 @@ export function AddStudentDrawer() {
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange} swipeDirection="right">
-      <Button onClick={() => setOpen(true)}>
-        <Plus className="size-4" />
-        Add Student
+      <Button variant="outline" onClick={() => handleOpenChange(true)}>
+        <Pencil className="size-4" />
+        Edit
       </Button>
       <DrawerContent>
         <form onSubmit={handleSubmit} className="flex h-full flex-col">
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <DrawerTitle>Add Student</DrawerTitle>
-            <DrawerDescription>
-              Enter the student and parent details to create a new record.
-            </DrawerDescription>
+            <DrawerTitle>Edit Student</DrawerTitle>
+            <DrawerDescription>Update this student&apos;s details.</DrawerDescription>
 
             {formError ? (
               <p
@@ -143,6 +139,7 @@ export function AddStudentDrawer() {
               onFieldChange={updateField}
               fieldErrors={fieldErrors}
               disabled={isPending}
+              autoFocusFirstField={false}
             />
           </div>
 
@@ -157,7 +154,7 @@ export function AddStudentDrawer() {
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-              Save Student
+              Save Changes
             </Button>
           </DrawerFooter>
         </form>
